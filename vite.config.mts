@@ -2,6 +2,7 @@ import inject from "@medusajs/admin-vite-plugin"
 import react from "@vitejs/plugin-react"
 import { defineConfig, loadEnv } from "vite"
 import inspect from "vite-plugin-inspect"
+import { createHtmlPlugin } from "vite-plugin-html"
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -9,10 +10,9 @@ export default defineConfig(({ mode }) => {
 
   const BASE = env.VITE_MEDUSA_BASE || "/"
   const BACKEND_URL = env.VITE_MEDUSA_BACKEND_URL || "https://api.corgrit.com"
-  const STOREFRONT_URL =
-    env.VITE_MEDUSA_STOREFRONT_URL || "https://s.corgrit.com"
+  const STOREFRONT_URL = env.VITE_MEDUSA_STOREFRONT_URL || "https://s.corgrit.com"
 
-  /**
+    /**
    * Add this to your .env file to specify the project to load admin extensions from.
    */
   const MEDUSA_PROJECT = env.VITE_MEDUSA_PROJECT || null
@@ -22,14 +22,25 @@ export default defineConfig(({ mode }) => {
     plugins: [
       inspect(),
       react(),
-      inject({
-        sources,
+      inject({ sources }),
+      createHtmlPlugin({
+        minify: true,
+        inject: {
+          data: {
+            BASE,
+            BACKEND_URL,
+            STOREFRONT_URL,
+          },
+        },
       }),
     ],
     define: {
       __BASE__: JSON.stringify(BASE),
       __BACKEND_URL__: JSON.stringify(BACKEND_URL),
       __STOREFRONT_URL__: JSON.stringify(STOREFRONT_URL),
+    },
+    build: {
+      outDir: 'dist', // ensures all static files go to 'dist'
     },
     server: {
       open: true,
